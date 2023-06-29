@@ -15,28 +15,37 @@
 
 using namespace std;
 int recursiveSumNormal(vector<int>::iterator begin, vector<int>::iterator end);
-void recursiveSumParallelPrivate(int *result, vector<int>::iterator begin, vector<int>::iterator end);
+void recursiveSumParallelPrivate(vector<int>::iterator begin, vector<int>::iterator end);
 void recursiveSumParallel(Parameters parameters);
+int recursiveSumParallelPrivate2(vector<int>::iterator begin, vector<int>::iterator end);
+void recursiveSumParallel2(Parameters parameters);
 atomic_bool accesableResult = true;
 atomic_bool accesablePtr = true;
+atomic<int> result = 0;
 int main()
 {
-    ThreadPool<void, Parameters> tp(100);
-    vector<int> numbers(100000);
-    for (int i = 0; i < 100000; i++)
+    result = 0;
+    //ThreadPool<void, Parameters> tp(100);
+    vector<int> numbers(800000);
+    for (int i = 0; i < 800000; i++)
     {
         numbers[i] = i;
     }
-    tp.push(&recursiveSumParallel);
+    //tp.push(&recursiveSumParallel);
     auto start = chrono::high_resolution_clock::now();
     int num = recursiveSumNormal(numbers.begin(), numbers.end() - 1);
     auto finish = chrono::high_resolution_clock::now();
     cout << chrono::duration_cast<chrono::microseconds>(finish - start).count() << " answer " << num << endl;
     Parameters params(numbers.begin(), numbers.end());
-    start = chrono::high_resolution_clock::now();
+    /*start = chrono::high_resolution_clock::now();
     tp.run(params);
     finish = chrono::high_resolution_clock::now();
-    cout << setprecision(6) << chrono::duration_cast<chrono::microseconds>(finish - start).count() << " answer " << *params.result << endl;
+    cout << setprecision(6) << chrono::duration_cast<chrono::microseconds>(finish - start).count() << " answer " << result.load() << endl;
+    result = 0;*/
+    start = chrono::high_resolution_clock::now();
+    recursiveSumParallel2(params);
+    finish = chrono::high_resolution_clock::now();
+    cout << setprecision(6) << chrono::duration_cast<chrono::microseconds>(finish - start).count() << " answer " << result.load() << endl;
     return 0;
 }
 int recursiveSumNormal(vector<int>::iterator begin, vector<int>::iterator end)
@@ -59,6 +68,7 @@ int recursiveSumNormal(vector<int>::iterator begin, vector<int>::iterator end)
     int tmp = recursiveSumNormal(begin, begin + mid) + recursiveSumNormal(begin + mid + 1, end);
     return tmp;
 }
+/*
 void recursiveSumParallel(Parameters parameters)
 {
     unsigned int length = parameters.end - parameters.begin;
@@ -70,7 +80,7 @@ void recursiveSumParallel(Parameters parameters)
 
         while (tmpIndex != length)
         {
-            ThreadPool<void, Parameters>::pool[tmpIndex] = thread(ref(recursiveSumParallelPrivate), parameters.result, parameters.begin + tmpIndex, parameters.begin + tmpIndex + 1);
+            ThreadPool<void, Parameters>::pool[tmpIndex] = thread(ref(recursiveSumParallelPrivate), parameters.begin + tmpIndex, parameters.begin + tmpIndex + 1);
             ThreadPool<void, Parameters>::pool[tmpIndex].detach();
             tmpIndex++;
         }
@@ -79,7 +89,7 @@ void recursiveSumParallel(Parameters parameters)
     for (unsigned int i = 0; i < static_cast<unsigned int>(ThreadPool<void, Parameters>::THREAD_NUMBER); i++)
     {
 
-        ThreadPool<void, Parameters>::pool[i] = thread(ref(recursiveSumParallelPrivate), parameters.result, parameters.begin + i * tmplength, parameters.begin - 1 + (i + 1) * tmplength);
+        ThreadPool<void, Parameters>::pool[i] = thread(ref(recursiveSumParallelPrivate), parameters.begin + i * tmplength, parameters.begin - 1 + (i + 1) * tmplength);
         ThreadPool<void, Parameters>::pool[i].detach();
     }
     int tmp = tmplength * static_cast<unsigned int>(ThreadPool<void, Parameters>::THREAD_NUMBER);
@@ -90,53 +100,62 @@ void recursiveSumParallel(Parameters parameters)
     }
     while (tmp != 0)
     {
-        ThreadPool<void, Parameters>::pool[tmp] = thread(recursiveSumParallelPrivate, parameters.result, parameters.begin + tmp - 1, parameters.begin + tmp);
+        ThreadPool<void, Parameters>::pool[tmp] = thread(recursiveSumParallelPrivate, parameters.begin + tmp - 1, parameters.begin + tmp);
         ThreadPool<void, Parameters>::pool[tmp].detach();
         tmp -= 2;
     }
     return;
 }
-
-void recursiveSumParallelPrivate(int *result, vector<int>::iterator begin, vector<int>::iterator end)
+*/
+void recursiveSumParallel2(Parameters parameters)
 {
-    mutex m;
-    unique_lock<mutex> tmplock(m);
-    condition_variable cv;
-    cv.wait(tmplock, []() -> bool
-            { return accesablePtr.load(); });
-    accesablePtr.exchange(false );
+    unsigned int length = parameters.end - parameters.begin;
+    unsigned int tmplength = length / static_cast<unsigned int>(ThreadPool<void, Parameters>::THREAD_NUMBER);
+    for (unsigned int i = 0; i < static_cast<unsigned int>(ThreadPool<void, Parameters>::THREAD_NUMBER); i++)
+    {
+
+        auto tmp = async(std::launch::async,ref(recursiveSumParallelPrivate2), parameters.begin + i * tmplength, parameters.begin - 1 + (i + 1) * tmplength);
+        result += tmp.get();
+    }
+}
+/*
+void recursiveSumParallelPrivate(vector<int>::iterator begin, vector<int>::iterator end)
+{
     unsigned int mid = static_cast<unsigned int>(end - begin);
-    accesablePtr.exchange(true);
-    
+
     if (mid < 0)
     {
         return;
     }
     else if (mid == 0)
     {
-
-        mutex m;
-        unique_lock<mutex> lock(m);
-        condition_variable cv;
-        cv.wait(lock, []() -> bool
-                { return accesableResult.load(); });
-        accesableResult.exchange(false);
-        *result += *begin;
-        accesableResult.exchange(true);
+        result.exchange(result.load(memory_order::memory_order_relaxed) + *begin, memory_order::memory_order_relaxed);
         return;
     }
     else if (mid == 1)
     {
-        mutex m;
-        unique_lock<mutex> lock(m);
-        condition_variable cv;
-        cv.wait(lock, []() -> bool
-                { return accesableResult.load(); });
-        accesableResult.exchange(false);
-        *result += *begin + *(begin + 1);
-        accesableResult.exchange(true);
+        result.exchange(result.load() + *begin + *(begin + 1));
         return;
     }
-    recursiveSumParallelPrivate(result, begin, begin + (mid/2));
-    recursiveSumParallelPrivate(result, begin + (mid/2) + 1, end);
+    recursiveSumParallelPrivate(begin, begin + (mid / 2));
+    recursiveSumParallelPrivate(begin + (mid / 2) + 1, end);
+}*/
+int recursiveSumParallelPrivate2(vector<int>::iterator begin, vector<int>::iterator end)
+{
+    unsigned int mid = static_cast<unsigned int>(end - begin);
+
+    if (mid < 0)
+    {
+        return 0;
+    }
+    else if (mid == 0)
+    {
+        return *begin;
+    }
+    else if (mid == 1)
+    {
+        return *begin + *(begin + 1);
+    }
+       
+    return recursiveSumParallelPrivate2(begin + (mid / 2) + 1, end) + recursiveSumParallelPrivate2(begin, begin + (mid / 2));
 }
