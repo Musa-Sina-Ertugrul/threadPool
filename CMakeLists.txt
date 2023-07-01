@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.17.0)
+project(Parallel)
+set(srcReturnTypes "")
+set(srcThreadPool "")
+
+add_subdirectory(ThreadPool)
+
+message(STATUS ${CMAKE_SYSTEM_NAME})
+if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+    message(STATUS "platform is windows")
+endif()
+add_definitions(-DsrcReturnTypes="${srcReturnTypes}")
+add_definitions(-DsrcThreadPool="${srcThreadPool}")
+cmake_host_system_information(RESULT Cores QUERY NUMBER_OF_LOGICAL_CORES)
+add_definitions(-DthreadNumber="${Cores}")
+message(STATUS "${Cores} thread avaible")
+add_executable(Main main.cpp)
+target_link_libraries(Main PUBLIC thPool)

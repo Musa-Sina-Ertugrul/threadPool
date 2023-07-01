@@ -1,0 +1,3 @@
+C:\Users\msert\bin\cmake.exe -E rm -f CMakeFiles\Main.dir/objects.a
+C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\Main.dir/objects.a @CMakeFiles\Main.dir\objects1.rsp
+C:\msys64\mingw64\bin\g++.exe -g -Wl,--dependency-file,CMakeFiles\Main.dir\link.d -Wl,--whole-archive CMakeFiles\Main.dir/objects.a -Wl,--no-whole-archive -o Main.exe -Wl,--out-implib,libMain.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\Main.dir\linkLibs.rsp

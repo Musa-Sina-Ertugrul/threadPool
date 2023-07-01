@@ -1,4 +1,4 @@
-#include "ThreadPool.hpp"
+#include srcThreadPool
 #include <vector>
 #include <chrono>
 #include <iostream>
@@ -10,8 +10,9 @@
 #include <condition_variable>
 #include <mutex>
 #include <atomic>
-#include "ReturnTypes.hpp"
+#include srcReturnTypes
 #include <iomanip>
+#include <math.h>
 
 using namespace std;
 int recursiveSumNormal(vector<int>::iterator begin, vector<int>::iterator end);
@@ -25,13 +26,28 @@ atomic<int> result = 0;
 int main()
 {
     result = 0;
-    //ThreadPool<void, Parameters> tp(100);
-    vector<int> numbers(800000);
-    for (int i = 0; i < 800000; i++)
+    // ThreadPool<void, Parameters> tp(100);
+    int threadNum = 0;
+    char c = ' ';
+    string tmp = threadNumber;
+    int index = 0;
+    int len = tmp.length();
+    while (c != '\0')
+    {
+        c = tmp[index];
+        if (c == '\0')
+        {
+            break;
+        }
+        threadNum += (c - '0') * pow(10, len - index - 1);
+        index++;
+    }
+    vector<int> numbers(threadNum * 10000000);
+    for (int i = 0; i < threadNum * 10000000; i++)
     {
         numbers[i] = i;
     }
-    //tp.push(&recursiveSumParallel);
+    // tp.push(&recursiveSumParallel);
     auto start = chrono::high_resolution_clock::now();
     int num = recursiveSumNormal(numbers.begin(), numbers.end() - 1);
     auto finish = chrono::high_resolution_clock::now();
@@ -114,7 +130,7 @@ void recursiveSumParallel2(Parameters parameters)
     for (unsigned int i = 0; i < static_cast<unsigned int>(ThreadPool<void, Parameters>::THREAD_NUMBER); i++)
     {
 
-        auto tmp = async(std::launch::async,ref(recursiveSumParallelPrivate2), parameters.begin + i * tmplength, parameters.begin - 1 + (i + 1) * tmplength);
+        auto tmp = async(std::launch::async, ref(recursiveSumParallelPrivate2), parameters.begin + i * tmplength, parameters.begin - 1 + (i + 1) * tmplength);
         result += tmp.get();
     }
 }
@@ -156,6 +172,6 @@ int recursiveSumParallelPrivate2(vector<int>::iterator begin, vector<int>::itera
     {
         return *begin + *(begin + 1);
     }
-       
+
     return recursiveSumParallelPrivate2(begin + (mid / 2) + 1, end) + recursiveSumParallelPrivate2(begin, begin + (mid / 2));
 }

@@ -1,0 +1,2 @@
+C:\msys64\mingw64\bin\ar.exe qc libthPool.a CMakeFiles/thPool.dir/src/ReturnTypes.cpp.obj CMakeFiles/thPool.dir/src/ThreadPool.cpp.obj
+C:\msys64\mingw64\bin\ranlib.exe libthPool.a

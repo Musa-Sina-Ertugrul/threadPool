@@ -1,0 +1,20 @@
+[
+{
+  "directory": "C:/Users/msert/projects/threadPool/build",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe -DsrcReturnTypes=\\\"C:/Users/msert/projects/threadPool/ThreadPool/include/ReturnTypes.hpp\\\" -DsrcThreadPool=\\\"C:/Users/msert/projects/threadPool/ThreadPool/include/ThreadPool.hpp\\\" -DthreadNumber=\\\"12\\\"  -g -o CMakeFiles\\Main.dir\\main.cpp.obj -c C:\\Users\\msert\\projects\\threadPool\\main.cpp",
+  "file": "C:/Users/msert/projects/threadPool/main.cpp",
+  "output": "CMakeFiles/Main.dir/main.cpp.obj"
+},
+{
+  "directory": "C:/Users/msert/projects/threadPool/build/ThreadPool",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe -DsrcReturnTypes=\\\"C:/Users/msert/projects/threadPool/ThreadPool/include/ReturnTypes.hpp\\\" -DsrcThreadPool=\\\"C:/Users/msert/projects/threadPool/ThreadPool/include/ThreadPool.hpp\\\"  -g -o CMakeFiles\\thPool.dir\\src\\ReturnTypes.cpp.obj -c C:\\Users\\msert\\projects\\threadPool\\ThreadPool\\src\\ReturnTypes.cpp",
+  "file": "C:/Users/msert/projects/threadPool/ThreadPool/src/ReturnTypes.cpp",
+  "output": "ThreadPool/CMakeFiles/thPool.dir/src/ReturnTypes.cpp.obj"
+},
+{
+  "directory": "C:/Users/msert/projects/threadPool/build/ThreadPool",
+  "command": "C:\\msys64\\mingw64\\bin\\g++.exe -DsrcReturnTypes=\\\"C:/Users/msert/projects/threadPool/ThreadPool/include/ReturnTypes.hpp\\\" -DsrcThreadPool=\\\"C:/Users/msert/projects/threadPool/ThreadPool/include/ThreadPool.hpp\\\"  -g -o CMakeFiles\\thPool.dir\\src\\ThreadPool.cpp.obj -c C:\\Users\\msert\\projects\\threadPool\\ThreadPool\\src\\ThreadPool.cpp",
+  "file": "C:/Users/msert/projects/threadPool/ThreadPool/src/ThreadPool.cpp",
+  "output": "ThreadPool/CMakeFiles/thPool.dir/src/ThreadPool.cpp.obj"
+}
+]
